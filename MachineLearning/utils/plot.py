@@ -1,5 +1,5 @@
-import matplotlib.pyplot as plt
 import torch
+import matplotlib.pyplot as plt
 from IPython import display
 
 
@@ -36,6 +36,7 @@ def set_axes(axes, xlabel, ylabel, xlim, ylim, xscale, yscale, legend):
 
     if legend:
         axes.legend(legend)
+
     axes.grid()
 
 
@@ -87,3 +88,4 @@ class Animator:
         self.config_axes()
         display.display(self.fig)
         display.clear_output(wait=True)
+        plt.pause(0.5)

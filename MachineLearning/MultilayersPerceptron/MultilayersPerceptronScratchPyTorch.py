@@ -6,6 +6,17 @@ from utils.downloader import load_data_fashion_mnist
 from utils.plot import Animator
 
 
+def relu(X):
+    a = torch.zeros_like(X)
+    return torch.max(X, a)
+
+
+def net(X):
+    X = X.reshape(-1, num_inputs)
+    H = relu(X @ W1 + b1)
+    return H @ W2 + b2
+
+
 def accuracy(y_hat, y):
     """计算预测正确的数量"""
     if len(y_hat.shape) > 1 and y_hat.shape[1] > 1:
@@ -73,22 +84,21 @@ def train(net, train_iter, test_iter, loss, num_epochs, updater):
         test_acc = evaluate_accuracy(net, test_iter)
         animator.add(epoch + 1, train_metrics + (test_acc,))
 
-    # train_loss, train_acc = train_metrics
-
-
-def init_weights(m):
-    if type(m) == nn.Linear:
-        nn.init.normal_(m.weight, std=0.01)
-
 
 if __name__ == '__main__':
     batch_size = 256
     train_iter, test_iter = load_data_fashion_mnist(batch_size)
 
-    net = nn.Sequential(nn.Flatten(), nn.Linear(784, 256), nn.ReLU(), nn.Linear(256, 10))
-    net.apply(init_weights)
+    num_inputs, num_outputs, num_hiddens = 784, 10, 256
+    W1 = nn.Parameter(torch.randn(num_inputs, num_hiddens, requires_grad=True))
+    b1 = nn.Parameter(torch.zeros(num_hiddens, requires_grad=True))
+    W2 = nn.Parameter(torch.randn(num_hiddens, num_outputs, requires_grad=True))
+    b2 = nn.Parameter(torch.zeros(num_outputs, requires_grad=True))
+
+    params = [W1, b1, W2, b2]
 
     loss = nn.CrossEntropyLoss()
     num_epochs, lr = 10, 0.1
-    trainer = torch.optim.SGD(net.parameters(), lr)
-    train(net, train_iter, test_iter, loss, num_epochs, trainer)
+    updater = torch.optim.SGD(params, lr)
+    train(net, train_iter, test_iter, loss, num_epochs, updater)
+
